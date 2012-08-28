@@ -20,82 +20,33 @@
 
 package org.sonar.ant;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
-import org.apache.tools.ant.Project;
-import org.apache.tools.ant.types.Environment;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.sonar.api.CoreProperties;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
-import org.sonar.test.TestUtils;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertThat;
 
 import java.io.File;
 import java.util.Properties;
 
-import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import org.apache.commons.configuration.BaseConfiguration;
+import org.apache.commons.configuration.Configuration;
+import org.apache.commons.configuration.PropertiesConfiguration;
+import org.apache.tools.ant.Project;
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.sonar.batch.bootstrapper.ProjectDefinition;
 
 public class LauncherTest {
 
   @Rule
   public ExpectedException thrown = ExpectedException.none();
 
-  private Project antProject;
-  private SonarTask task;
   private Launcher launcher;
 
   @Before
   public void setUp() {
-    antProject = new Project();
-    antProject.setBaseDir(new File("."));
-    task = new SonarTask();
-    task.setProject(antProject);
-    launcher = new Launcher(task);
-  }
-
-  @Test
-  public void defaultValues() {
-    antProject.setName("My project");
-    antProject.setDescription("My description");
-    task.setKey("org.example:example");
-    task.setVersion("0.1-SNAPSHOT");
-
-    ProjectDefinition sonarProject = launcher.defineProject();
-
-    assertThat(sonarProject.getBaseDir(), is(antProject.getBaseDir()));
-    assertThat(sonarProject.getWorkDir(), is(task.getWorkDir()));
-    Properties sonarProperties = sonarProject.getProperties();
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_KEY_PROPERTY), is("org.example:example"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_VERSION_PROPERTY), is("0.1-SNAPSHOT"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_NAME_PROPERTY), is("My project"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_DESCRIPTION_PROPERTY), is("My description"));
-  }
-
-  @Test
-  public void overrideDefaultValues() {
-    antProject.setProperty(CoreProperties.PROJECT_BRANCH_PROPERTY, "branch");
-    task.setKey("org.example:example");
-    task.setVersion("0.1-SNAPSHOT");
-    File newBaseDir = new File("newBaseDir");
-    task.setBaseDir(newBaseDir);
-
-    setProperty(task, CoreProperties.PROJECT_NAME_PROPERTY, "My project");
-    setProperty(task, CoreProperties.PROJECT_DESCRIPTION_PROPERTY, "My description");
-    setProperty(task, CoreProperties.PROJECT_BRANCH_PROPERTY, "Not used");
-
-    ProjectDefinition sonarProject = launcher.defineProject();
-
-    Properties sonarProperties = sonarProject.getProperties();
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_KEY_PROPERTY), is("org.example:example"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_VERSION_PROPERTY), is("0.1-SNAPSHOT"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_NAME_PROPERTY), is("My project"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_DESCRIPTION_PROPERTY), is("My description"));
-    assertThat(sonarProperties.getProperty(CoreProperties.PROJECT_BRANCH_PROPERTY), is("branch"));
-    assertThat(sonarProject.getBaseDir(), is(newBaseDir));
+      ProjectDefinition projectDefinition = new ProjectDefinition(new File("."), new File("."),new Properties());
+    launcher = new Launcher(projectDefinition,Project.MSG_INFO);
   }
 
   @Test
@@ -115,13 +66,6 @@ public class LauncherTest {
     PropertiesConfiguration config = new PropertiesConfiguration();
     config.setProperty("sonar.verbose", "false");
     assertThat(launcher.getLoggerLevel(config), is("INFO"));
-  }
-
-  private void setProperty(SonarTask task, String key, String value) {
-    Environment.Variable var = new Environment.Variable();
-    var.setKey(key);
-    var.setValue(value);
-    task.addConfiguredProperty(var);
   }
 
   @Test
@@ -150,39 +94,4 @@ public class LauncherTest {
     assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
   }
 
-  @Test
-  public void shouldFailIfMandatoryPropertiesMissing() {
-    thrown.expect(IllegalArgumentException.class);
-    thrown.expectMessage("The following mandatory information is missing:");
-    thrown.expectMessage("- property 'sonar.sources'");
-    thrown.expectMessage("- property 'sonar.projectKey'");
-
-    Launcher.checkAntProjectForMandatoryProperties(new Project());
-  }
-
-  @Test
-  public void shouldNotFailIfMandatoryPropertiesPresent() {
-    Project antProject = new Project();
-    antProject.setProperty("sonar.sources", "src");
-    antProject.setProperty("sonar.projectKey", "foo");
-
-    Launcher.checkAntProjectForMandatoryProperties(antProject);
-  }
-
-  @Test
-  public void shouldFindSubModuleBuildFileWithModuleAbsolutePath() {
-    File buildFile = TestUtils.getResource("org/sonar/ant/LauncherTest/build.xml");
-
-    File foundFile = Launcher.findSubModuleBuildFile(new Project(), buildFile.getAbsolutePath());
-    assertThat(foundFile, is(buildFile));
-  }
-
-  @Test
-  public void shouldFindSubModuleBuildFileWithModuleRelativePath() {
-    Project antProject = new Project();
-    antProject.setBaseDir(TestUtils.getResource("org/sonar/ant"));
-
-    File foundFile = Launcher.findSubModuleBuildFile(antProject, "LauncherTest/build.xml");
-    assertThat(foundFile, is(TestUtils.getResource("org/sonar/ant/LauncherTest/build.xml")));
-  }
 }
