@@ -28,11 +28,11 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.Task;
 import org.apache.tools.ant.types.Environment;
+import org.apache.tools.ant.types.FileSet;
 import org.apache.tools.ant.types.Path;
 import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.ResourceCollection;
@@ -55,6 +55,8 @@ public class SonarBaseTask extends Task {
     private Path binaries;
     private Path libraries;
 
+    private List<FileSet> submodulesFileSet;
+
     public SonarBaseTask() {
         super();
     }
@@ -76,7 +78,8 @@ public class SonarBaseTask extends Task {
             properties.setProperty(CoreProperties.PROJECT_NAME_PROPERTY,
                     getProject().getName());
         }
-        if (!properties.containsKey(CoreProperties.PROJECT_DESCRIPTION_PROPERTY)
+        if (!properties
+                .containsKey(CoreProperties.PROJECT_DESCRIPTION_PROPERTY)
                 && getProject().getDescription() != null) {
             properties.setProperty(CoreProperties.PROJECT_DESCRIPTION_PROPERTY,
                     getProject().getDescription());
@@ -108,22 +111,21 @@ public class SonarBaseTask extends Task {
     }
 
     private void defineSubProject(ProjectDefinition parentProjectDefinition) {
-        String sonarModules = getProject().getProperty("sonar.modules");
-        if (sonarModules==null) {
-            sonarModules="";
-        }
-        String[] modules = StringUtils.split(sonarModules, ',');
-        for (String module : StringUtils.stripAll(modules)) {
-            XStream xStream = new XStream();
-            File f = new File(module);
-            try {
-                ProjectDefinition projectDefinition = (ProjectDefinition) xStream
-                        .fromXML(new FileInputStream(f));
+        for (FileSet fileSet : submodulesFileSet) {
+            String[] submodules = fileSet.getDirectoryScanner()
+                    .getIncludedFiles();
+            for (String curentSubModule : submodules) {
+                XStream xStream = new XStream();
+                File f = new File(curentSubModule);
+                try {
+                    ProjectDefinition projectDefinition = (ProjectDefinition) xStream
+                            .fromXML(new FileInputStream(f));
 
-                parentProjectDefinition.addModule(projectDefinition);
-            } catch (FileNotFoundException e) {
-                new BuildException("Can't parse project definition for "
-                        + module, e);
+                    parentProjectDefinition.addModule(projectDefinition);
+                } catch (FileNotFoundException e) {
+                    new BuildException("Can't parse project definition at "
+                            + curentSubModule, e);
+                }
             }
         }
     }
@@ -283,4 +285,15 @@ public class SonarBaseTask extends Task {
         }
         return libraries;
     }
+
+    /**
+     * Adds a set of files to be deleted.
+     * 
+     * @param set
+     *            the set of files to be deleted
+     */
+    public void addSubmodules(FileSet set) {
+        submodulesFileSet.add(set);
+    }
+
 }
