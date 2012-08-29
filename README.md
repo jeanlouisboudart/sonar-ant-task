@@ -58,7 +58,7 @@ Analyzing a Project
         <sonar:sonar key="org.example:example" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant"/>
       </target>
     </project>
-```xml
+```
 
 Declaring a XML namespace for Ant tasks is optional but always recommended if you mix tasks from different libraries.
 Additional analysis parameters can be set within <property> nodes of the sonar Ant task.
@@ -77,5 +77,35 @@ Since version 1.2 you can specify sonar.libraries using path-like structure as f
 
 Analyzing a Multi-module Project
 --------------------------------
-TODO
 
+Let's say that we have a project "Parent" containing two modules "Child1" and "Child2" and we want Sonar to be able to analyze the overall Parent multi-module project:
+
+```
+Parent
+  build.xml
+    |
+    ------ dir1/Child1
+    |             build.xml
+    |             src
+    |             bin
+    ------ dir2/Child2
+                  build.xml
+                  src
+                  bin
+```
+
+"Child1" and "Child2" nees to define the project by using "project-definition" task  :
+```xml
+<sonar:project-definition key="org.example:child2" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant" file="child2-sonar.xml"/>
+```
+project-definition task will produce a file with all metadata required for analysis.
+
+[Additional analysis](http://docs.codehaus.org/display/SONAR/Analysis+Parameters) parameters can be set within <property> nodes of the sonar Ant task.
+
+Then, you can invoke "sonar:sonar" task in your main project :
+```xml
+<sonar:sonar key="org.example:example" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant">
+   <!-- give your project definition files here -->
+   <submodules dir="${basedir}" includes="**/*-sonar.xml"/>
+</sonar>
+```
