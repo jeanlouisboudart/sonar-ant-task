@@ -87,7 +87,7 @@ public class SonarTask extends SonarBaseTask {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.ant.Launcher");
       Constructor<?> constructor = launcherClass.getConstructor(SonarTask.class);
-      Object launcher = constructor.newInstance(this,Utils.getAntLoggerLever(getProject()));
+      Object launcher = constructor.newInstance(buildProjectDefinition(),Utils.getAntLoggerLever(getProject()));
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
     } catch (InvocationTargetException e) {
