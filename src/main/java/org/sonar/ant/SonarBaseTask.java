@@ -55,7 +55,7 @@ public class SonarBaseTask extends Task {
     private Path binaries;
     private Path libraries;
 
-    private List<FileSet> submodulesFileSet;
+    private List<FileSet> submodulesFileSet= new ArrayList<FileSet>();
 
     public SonarBaseTask() {
         super();
