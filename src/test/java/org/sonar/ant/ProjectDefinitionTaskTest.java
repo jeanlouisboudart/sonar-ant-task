@@ -27,6 +27,7 @@ import java.io.File;
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.ProjectHelper;
 import org.apache.tools.ant.taskdefs.Delete;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -43,14 +44,18 @@ public class ProjectDefinitionTaskTest {
     @Before
     public void setUp() {
       antProject = new Project();
-      File testDir=new File(".");
-      antProject.setBaseDir(testDir);
-      //clean project definition before each test
-      Delete deleteTask = new Delete();
-      deleteTask.setProject(antProject);
-      deleteTask.setDir(testDir);
-      deleteTask.setIncludes("root.xml, child1-sonar.xml, child2-sonar.xml");
-      deleteTask.execute();
+      antProject.setBaseDir(new File("."));
+     }
+    
+    @After
+    public void tearDown() {
+        //clean project definition before each test
+        Delete deleteTask = new Delete();
+        deleteTask.setProject(antProject);
+        deleteTask.setDir(new File("."));
+        deleteTask.setIncludes("root.xml, child1-sonar.xml, child2-sonar.xml");
+        deleteTask.execute();
+         
     }
 
     @Test
@@ -68,8 +73,8 @@ public class ProjectDefinitionTaskTest {
         ProjectHelper.configureProject(antProject, TestUtils.getResource("build.xml"));
         antProject.executeTarget("init-submodules");
         assertThat(new File(".","root.xml").exists(), is(true));
-        assertThat(new File(".","child1.xml").exists(), is(true));
-        assertThat(new File(".","child2.xml").exists(), is(true));
+        assertThat(new File(".","child1-sonar.xml").exists(), is(true));
+        assertThat(new File(".","child2-sonar.xml").exists(), is(true));
         
     }
     

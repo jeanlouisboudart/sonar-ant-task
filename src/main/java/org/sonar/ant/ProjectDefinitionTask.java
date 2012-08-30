@@ -23,7 +23,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
+import org.apache.tools.ant.AntTypeDefinition;
 import org.apache.tools.ant.BuildException;
+import org.apache.tools.ant.Project;
 import org.sonar.batch.bootstrapper.ProjectDefinition;
 
 import com.thoughtworks.xstream.XStream;
@@ -38,13 +40,19 @@ public class ProjectDefinitionTask extends SonarBaseTask {
         }
         ProjectDefinition projectDefinition = buildProjectDefinition();
         XStream xStream = new XStream();
+        // avoid marchalling stuff dealing with classloader 
+        // thread otherwise we would not able to unmarshall it
+        // this occurs when serializing Project.class
+        xStream.omitField(AntTypeDefinition.class, "classLoader");
+        xStream.omitField(Project.class, "listeners");
+        xStream.omitField(Project.class, "threadTasks");
+        xStream.omitField(Project.class, "threadGroupTasks");
         try {
-            xStream.toXML(projectDefinition,new FileOutputStream(file));
+            xStream.toXML(projectDefinition, new FileOutputStream(file));
         } catch (FileNotFoundException e) {
             throw new BuildException(e);
         }
     }
-    
 
     public File getFile() {
         return file;
