@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="child2" default="" basedir=".">
+
+    <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml"/>
+    <target name="init">
+	    <sonar:project-definition key="org.example:child2" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant" file="child2-sonar.xml"/>
+    </target>
+</project>

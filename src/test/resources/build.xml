@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="root" default="" basedir=".">
+
+    <taskdef uri="antlib:org.sonar.ant" resource="org/sonar/ant/antlib.xml"/>
+	<target name="init-submodules">
+		<ant antfile="src/test/resources/child1/build.xml" target="init"/>
+		<ant antfile="src/test/resources/child2/build.xml" target="init"/>
+	    <sonar:project-definition key="org.example:root" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant" file="root.xml">
+	        <submodules dir="${basedir}" includes="**/*-sonar.xml"/>
+	    </sonar:project-definition>
+	</target>
+	
+	<target name="init-singleproject">
+		<sonar:project-definition key="org.example:singleproject" version="0.1-SNAPSHOT" xmlns:sonar="antlib:org.sonar.ant" file="root.xml"/>
+	</target>
+</project>

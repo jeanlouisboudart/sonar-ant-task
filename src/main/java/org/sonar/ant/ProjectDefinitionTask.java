@@ -38,7 +38,6 @@ public class ProjectDefinitionTask extends SonarBaseTask {
         }
         ProjectDefinition projectDefinition = buildProjectDefinition();
         XStream xStream = new XStream();
-        
         try {
             xStream.toXML(projectDefinition,new FileOutputStream(file));
         } catch (FileNotFoundException e) {
