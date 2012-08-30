@@ -1,7 +1,6 @@
 Analysing with ant task
 =======================
 
-
 Installation
 ------------
 
@@ -109,3 +108,113 @@ Then, you can invoke "sonar:sonar" task in your main project :
    <submodules dir="${basedir}" includes="**/*-sonar.xml"/>
 </sonar>
 ```
+
+sonar task
+==========
+
+Description
+-----------
+
+Run sonar analysis.
+
+Argument
+--------
+
+<table>
+  <tr>
+    <td>attribute name</td>
+    <td>description</td>
+    <td>mandatory</td>
+  </tr>
+  <tr>
+    <td>key</td>
+    <td>project key identifier</td>
+    <td>yes</td>
+  </tr>
+  <tr>
+    <td>workDir</td>
+    <td>sonar work dir</td>
+    <td>no</td>
+  </tr>
+  <tr>
+    <td>basedir</td>
+    <td>sonar base dir</td>
+    <td>no</td>
+  </tr>
+</table>
+
+Nested elements
+---------------
+sources
+tests
+binaries
+libraries
+
+submodules
+
+Example
+-------
+
+```xml
+<sonar key="org.example:example" version="0.1-SNAPSHOT"/>
+```
+
+
+project-definition task
+=======================
+
+Description
+-----------
+
+Define project for sonar analysis. This task will generate a file containing project metadata required for sonar analysis.
+This task is required if you need to describe submodules. Otherwise you just to use sonar task.
+
+Argument
+--------
+
+<table>
+  <tr>
+    <td>attribute name</td>
+    <td>description</td>
+    <td>mandatory</td>
+  </tr>
+  <tr>
+    <td>key</td>
+    <td>project key identifier</td>
+    <td>yes</td>
+  </tr>
+  <tr>
+    <td>file</td>
+    <td>file where project definition will be produced</td>
+    <td>yes</td>
+  </tr>
+  <tr>
+    <td>workDir</td>
+    <td>sonar work dir</td>
+    <td>no</td>
+  </tr>
+  <tr>
+    <td>basedir</td>
+    <td>sonar base dir</td>
+    <td>no</td>
+  </tr>
+</table>
+
+Nested elements
+---------------
+sources
+tests
+binaries
+libraries
+
+submodules
+
+Example
+-------
+
+```xml
+<project-definition key="org.example:example" version="0.1-SNAPSHOT" file="mymodule-sonar.xml"/>
+```
+
+
+
