@@ -49,7 +49,7 @@ public class Launcher {
     private ProjectDefinition projectDefinition;
     private int antLogLevel;
 
-    public Launcher(ProjectDefinition projectDefinition, int antLogLevel) {
+    public Launcher(ProjectDefinition projectDefinition, Integer antLogLevel) {
         this.projectDefinition = projectDefinition;
         this.antLogLevel = antLogLevel;
     }

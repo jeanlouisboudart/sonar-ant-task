@@ -33,6 +33,7 @@ import org.apache.tools.ant.Main;
 import org.sonar.batch.bootstrapper.BootstrapClassLoader;
 import org.sonar.batch.bootstrapper.Bootstrapper;
 import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
+import org.sonar.batch.bootstrapper.ProjectDefinition;
 
 public class SonarTask extends SonarBaseTask {
 
@@ -86,7 +87,7 @@ public class SonarTask extends SonarBaseTask {
     try {
       Thread.currentThread().setContextClassLoader(sonarClassLoader);
       Class<?> launcherClass = sonarClassLoader.findClass("org.sonar.ant.Launcher");
-      Constructor<?> constructor = launcherClass.getConstructor(SonarTask.class);
+      Constructor<?> constructor = launcherClass.getConstructor(ProjectDefinition.class,Integer.class);
       Object launcher = constructor.newInstance(buildProjectDefinition(),Utils.getAntLoggerLever(getProject()));
       Method method = launcherClass.getMethod("execute");
       method.invoke(launcher);
