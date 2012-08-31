@@ -90,7 +90,7 @@ public final class Utils {
    * <li>4 - debug</li>
    * </ul>
    */
-  public static int getAntLoggerLever(Project project) {
+  public static Integer getAntLoggerLever(Project project) {
     try {
       List<BuildListener> listeners = project.getBuildListeners();
       for (BuildListener listener : listeners) {
@@ -103,7 +103,7 @@ public final class Utils {
       }
     } catch (Exception e) { // NOSONAR if unable to determine level - just return default value
     }
-    return 2;
+    return Project.MSG_INFO;
   }
 
 }

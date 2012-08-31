@@ -217,9 +217,9 @@ public class SonarBaseTask extends Task {
             missingProps.add("\n  - task attribute 'version'");
         }
 
-        if (isNotFound("sonar.modules") && isSourceInfoMissing()) {
+        if (submodulesFileSet.size() == 0 && isSourceInfoMissing()) {
             missingProps
-                    .add("\n  - task attribute 'sources' or property 'sonar.sources'");
+                    .add("\n  - task attribute 'sources' or nested 'submodules' element ");
         }
         if (!missingProps.isEmpty()) {
             StringBuilder message = new StringBuilder(
