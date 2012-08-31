@@ -219,7 +219,7 @@ public class SonarBaseTask extends Task {
 
         if (submodulesFileSet.size() == 0 && isSourceInfoMissing()) {
             missingProps
-                    .add("\n  - task attribute 'sources' or nested 'submodules' element ");
+                    .add("\n  - task attribute 'sources' or nested 'submodules' element");
         }
         if (!missingProps.isEmpty()) {
             StringBuilder message = new StringBuilder(

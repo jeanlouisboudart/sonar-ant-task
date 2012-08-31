@@ -27,6 +27,7 @@ import java.util.Properties;
 
 import org.apache.tools.ant.Project;
 import org.apache.tools.ant.types.Environment;
+import org.apache.tools.ant.types.FileSet;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -57,7 +58,7 @@ public class SonarBaseTaskTest {
         thrown.expectMessage("The following mandatory information is missing:");
         thrown.expectMessage("- task attribute 'key'");
         thrown.expectMessage("- task attribute 'version'");
-        thrown.expectMessage("- task attribute 'sources' or property 'sonar.sources'");
+        thrown.expectMessage("- task attribute 'sources' or nested 'submodules' element");
 
         task.checkMandatoryProperties();
     }
@@ -96,8 +97,11 @@ public class SonarBaseTaskTest {
 
     @Test
     public void shouldNotFailIfMandatoryPropertiesNotPresentButMultiModules() {
-        task.getProperties()
-                .put("sonar.modules", "foo/build.xml,bar/build.xml");
+        FileSet fileSet = new FileSet();
+        fileSet.setDir(new File("."));
+        fileSet.setIncludes("**/*-sonar.xml");
+        
+        task.addSubmodules(fileSet);
         task.setProject(new Project());
         task.setKey("foo");
         task.setVersion("2");
