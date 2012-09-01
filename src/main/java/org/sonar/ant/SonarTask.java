@@ -103,10 +103,14 @@ public class SonarTask extends SonarBaseTask {
   }
 
   private BootstrapClassLoader createClassLoader() {
+      
+      //FIXME: Sonar-batch is now required at runtime by ant task as they use ProjectDefinition. Ant will need it to declare taskdef.
+      //To avoid issues with the class in both classloader will tell bootstraper to ignore the package of ProjectDefinition.
+      
     return bootstrapper.createClassLoader(
         new URL[] {Utils.getJarPath()}, // Add JAR with Sonar Ant task - it's a Jar which contains this class
         getClass().getClassLoader(),
-        "org.apache.tools.ant", "org.sonar.ant");
+        "org.apache.tools.ant", "org.sonar.ant","org.sonar.batch.bootstrapper"); 
   }
 
   private void checkSonarVersion() {
