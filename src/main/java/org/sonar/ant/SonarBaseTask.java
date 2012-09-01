@@ -38,7 +38,7 @@ import org.apache.tools.ant.types.Resource;
 import org.apache.tools.ant.types.ResourceCollection;
 import org.apache.tools.ant.types.resources.FileResource;
 import org.sonar.api.CoreProperties;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -63,8 +63,9 @@ public class SonarBaseTask extends Task {
 
     protected ProjectDefinition buildProjectDefinition() {
         Properties properties = new Properties();
-        ProjectDefinition definition = new ProjectDefinition(getBaseDir(),
-                getWorkDir(), properties);
+        ProjectDefinition definition = ProjectDefinition.create();
+        definition.setWorkDir(getWorkDir());
+        definition.setBaseDir(getBaseDir());
 
         definition.addContainerExtension(getProject());
 
@@ -89,14 +90,16 @@ public class SonarBaseTask extends Task {
         // Properties from Ant
         properties.putAll(getProject().getProperties());
         setPathProperties(properties, getProject());
+        
+        definition.setProperties(properties);
 
         // Source directories
         for (String dir : getPathAsList(createSources())) {
-            definition.addSourceDir(dir);
+            definition.addSourceDirs(dir);
         }
         // Test directories
         for (String dir : getPathAsList(createTests())) {
-            definition.addTestDir(dir);
+            definition.addTestDirs(dir);
         }
         // Binary directories
         for (String dir : getPathAsList(createBinaries())) {
@@ -121,7 +124,7 @@ public class SonarBaseTask extends Task {
                     ProjectDefinition projectDefinition = (ProjectDefinition) xStream
                             .fromXML(new FileInputStream(f));
 
-                    parentProjectDefinition.addModule(projectDefinition);
+                    parentProjectDefinition.addSubProject(projectDefinition);
                 } catch (FileNotFoundException e) {
                     new BuildException("Can't parse project definition at "
                             + curentSubModule, e);

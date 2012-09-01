@@ -39,17 +39,30 @@ public class SonarTaskTest {
 
   @Test
   public void shouldCheckVersion() {
-    assertThat(SonarTask.isVersionPriorTo2Dot8("1.0"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.0"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.1"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.2"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.3"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.4"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.4.1"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.5"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.6"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.7"), is(true));
-    assertThat(SonarTask.isVersionPriorTo2Dot8("2.8"), is(false));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("1.0"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.0"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.2"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.3"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.4"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.4.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.5"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.6"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.7"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.8"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.9"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.10"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.11"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.12"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.13"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.13.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("2.14"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("3.0"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("3.0.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("3.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("3.1.1"), is(true));
+    assertThat(SonarTask.isVersionPriorTo3Dot2("3.2"), is(false));
+    
   }
 
   @Test

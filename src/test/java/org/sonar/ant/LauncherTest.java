@@ -26,15 +26,12 @@ import static org.junit.Assert.assertThat;
 import java.io.File;
 import java.util.Properties;
 
-import org.apache.commons.configuration.BaseConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.PropertiesConfiguration;
 import org.apache.tools.ant.Project;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 
 public class LauncherTest {
 
@@ -42,56 +39,54 @@ public class LauncherTest {
   public ExpectedException thrown = ExpectedException.none();
 
   private Launcher launcher;
+  private ProjectDefinition projectDefinition;
 
   @Before
   public void setUp() {
-      ProjectDefinition projectDefinition = new ProjectDefinition(new File("."), new File("."),new Properties());
+    projectDefinition = ProjectDefinition.create();
+    projectDefinition.setProperties(new Properties());
+    projectDefinition.setWorkDir(new File("."));
+    projectDefinition.setBaseDir(new File("."));
     launcher = new Launcher(projectDefinition,Project.MSG_INFO);
   }
 
   @Test
   public void defaultLogLevelShouldBeInfo() {
-    assertThat(launcher.getLoggerLevel(new PropertiesConfiguration()), is("INFO"));
+    assertThat(launcher.getLoggerLevel(), is("INFO"));
   }
 
   @Test
   public void shouldEnableVerboseMode() {
-    PropertiesConfiguration config = new PropertiesConfiguration();
-    config.setProperty("sonar.verbose", "true");
-    assertThat(launcher.getLoggerLevel(config), is("DEBUG"));
+    projectDefinition.getProperties().put("sonar.verbose", "true");
+    assertThat(launcher.getLoggerLevel(), is("DEBUG"));
   }
 
   @Test
   public void shouldDisableVerboseMode() {
-    PropertiesConfiguration config = new PropertiesConfiguration();
-    config.setProperty("sonar.verbose", "false");
-    assertThat(launcher.getLoggerLevel(config), is("INFO"));
+    projectDefinition.getProperties().put("sonar.verbose", "false");
+    assertThat(launcher.getLoggerLevel(), is("INFO"));
   }
 
   @Test
   public void testGetSqlLevel() throws Exception {
-    Configuration conf = new BaseConfiguration();
+    assertThat(launcher.getSqlLevel(), is("WARN"));
 
-    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+    projectDefinition.getProperties().put("sonar.showSql", "true");
+    assertThat(launcher.getSqlLevel(), is("DEBUG"));
 
-    conf.setProperty("sonar.showSql", "true");
-    assertThat(Launcher.getSqlLevel(conf), is("DEBUG"));
-
-    conf.setProperty("sonar.showSql", "false");
-    assertThat(Launcher.getSqlLevel(conf), is("WARN"));
+    projectDefinition.getProperties().put("sonar.showSql", "false");
+    assertThat(launcher.getSqlLevel(), is("WARN"));
   }
 
   @Test
   public void testGetSqlResultsLevel() throws Exception {
-    Configuration conf = new BaseConfiguration();
+    assertThat(launcher.getSqlResultsLevel(), is("WARN"));
+    
+    projectDefinition.getProperties().put("sonar.showSqlResults", "true");
+    assertThat(launcher.getSqlResultsLevel(), is("DEBUG"));
 
-    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
-
-    conf.setProperty("sonar.showSqlResults", "true");
-    assertThat(Launcher.getSqlResultsLevel(conf), is("DEBUG"));
-
-    conf.setProperty("sonar.showSqlResults", "false");
-    assertThat(Launcher.getSqlResultsLevel(conf), is("WARN"));
+    projectDefinition.getProperties().put("sonar.showSqlResults", "false");
+    assertThat(launcher.getSqlResultsLevel(), is("WARN"));
   }
 
 }

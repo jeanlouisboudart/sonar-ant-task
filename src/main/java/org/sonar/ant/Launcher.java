@@ -20,25 +20,12 @@
 
 package org.sonar.ant;
 
-import java.io.InputStream;
-
-import org.apache.commons.configuration.CompositeConfiguration;
-import org.apache.commons.configuration.Configuration;
-import org.apache.commons.configuration.EnvironmentConfiguration;
-import org.apache.commons.configuration.MapConfiguration;
-import org.apache.commons.configuration.SystemConfiguration;
-import org.apache.commons.io.IOUtils;
 import org.apache.tools.ant.Main;
-import org.slf4j.LoggerFactory;
-import org.sonar.api.utils.SonarException;
-import org.sonar.batch.Batch;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectReactor;
+import org.sonar.batch.bootstrapper.Batch;
+import org.sonar.batch.bootstrapper.Batch.Builder;
 import org.sonar.batch.bootstrapper.EnvironmentInformation;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
-import org.sonar.batch.bootstrapper.Reactor;
-
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.joran.JoranConfigurator;
-import ch.qos.logback.core.joran.spi.JoranException;
 
 public class Launcher {
 
@@ -58,48 +45,19 @@ public class Launcher {
      * This method invoked from {@link SonarTask}.
      */
     public void execute() {
-        Reactor reactor = new Reactor(projectDefinition);
-        Configuration config = getInitialConfiguration(projectDefinition);
-        initLogging(config);
-        Batch batch = new Batch(config, new EnvironmentInformation("Ant",
-                Main.getAntVersion()), reactor);
+        ProjectReactor reactor = new ProjectReactor(projectDefinition);
+        EnvironmentInformation environmentInformation = new EnvironmentInformation("Ant",
+                Main.getAntVersion());
+        Builder builder = Batch.builder().setProjectReactor(reactor).setEnvironment(environmentInformation);
+        Batch batch = builder.build();
+        batch.getLoggingConfiguration().setRootLevel(getLoggerLevel());
+        batch.getLoggingConfiguration().setSqlLevel(getSqlLevel());
+        batch.getLoggingConfiguration().setSqlResultsLevel(getSqlResultsLevel());
         batch.execute();
     }
 
-    /**
-     * TODO This method should use the component
-     * org.sonar.batch.bootstrapper.LoggingConfiguration created in sonar 2.14.
-     * It requires that the minimum supported version of sonar is 2.14, but it's
-     * currently 2.8.
-     */
-    private void initLogging(Configuration config) {
-        LoggerContext lc = (LoggerContext) LoggerFactory.getILoggerFactory();
-        InputStream input = Batch.class
-                .getResourceAsStream("/org/sonar/batch/logback.xml");
-        try {
-            JoranConfigurator configurator = new JoranConfigurator();
-            configurator.setContext(lc);
-            lc.reset();
-            lc.putProperty("ROOT_LOGGER_LEVEL", getLoggerLevel(config));
-            lc.putProperty("SQL_LOGGER_LEVEL", getSqlLevel(config));// since
-                                                                    // 2.14.
-                                                                    // Ignored
-                                                                    // on
-                                                                    // previous
-                                                                    // versions.
-            lc.putProperty("SQL_RESULTS_LOGGER_LEVEL",
-                    getSqlResultsLevel(config));// since 2.14. Ignored on
-                                                // previous versions.
-            configurator.doConfigure(input);
-        } catch (JoranException e) {
-            throw new SonarException("Can not initialize logging", e);
-        } finally {
-            IOUtils.closeQuietly(input);
-        }
-    }
-
-    String getLoggerLevel(Configuration config) {
-        if (config.getBoolean("sonar.verbose", false)) {
+    String getLoggerLevel() {
+        if (toBoolean(projectDefinition.getProperties().getProperty("sonar.verbose"))) {
             return DEBUG;
         }
 
@@ -113,23 +71,20 @@ public class Launcher {
         }
     }
 
-    private Configuration getInitialConfiguration(ProjectDefinition project) {
-        CompositeConfiguration configuration = new CompositeConfiguration();
-        configuration.addConfiguration(new SystemConfiguration());
-        configuration.addConfiguration(new EnvironmentConfiguration());
-        configuration.addConfiguration(new MapConfiguration(project
-                .getProperties()));
-        return configuration;
-    }
-
-    protected static String getSqlLevel(Configuration config) {
-        boolean showSql = config.getBoolean("sonar.showSql", false);
+    protected String getSqlLevel() {
+        boolean showSql = toBoolean(projectDefinition.getProperties().getProperty("sonar.showSql"));
         return showSql ? DEBUG : WARN;
     }
 
-    protected static String getSqlResultsLevel(Configuration config) {
-        boolean showSql = config.getBoolean("sonar.showSqlResults", false);
+    protected String getSqlResultsLevel() {
+        boolean showSql = toBoolean(projectDefinition.getProperties().getProperty("sonar.showSqlResults"));
         return showSql ? DEBUG : WARN;
+    }
+    
+    public static boolean toBoolean(String s) {
+        return ("on".equalsIgnoreCase(s)
+                || "true".equalsIgnoreCase(s)
+                || "yes".equalsIgnoreCase(s));
     }
 
 }

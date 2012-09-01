@@ -30,17 +30,18 @@ import java.util.Properties;
 
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Main;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 import org.sonar.batch.bootstrapper.BootstrapClassLoader;
 import org.sonar.batch.bootstrapper.Bootstrapper;
 import org.sonar.batch.bootstrapper.BootstrapperIOUtils;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
 
 public class SonarTask extends SonarBaseTask {
 
   /**
    * Array of prefixes of versions of Sonar without support of this Ant Task.
    */
-  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7"};
+    //TODO: verify unsupported verions is correct 
+  private static final String[] UNSUPPORTED_VERSIONS = {"1", "2.0", "2.1", "2.2", "2.3", "2.4", "2.5", "2.6", "2.7","2.8","2.9","2.10","2.11","2.12","2.13","2.13.1","2.14","3.0","3.0.1","3.1","3.1.1"};
 
   private static final String HOST_PROPERTY = "sonar.host.url";
 
@@ -110,19 +111,19 @@ public class SonarTask extends SonarBaseTask {
     return bootstrapper.createClassLoader(
         new URL[] {Utils.getJarPath()}, // Add JAR with Sonar Ant task - it's a Jar which contains this class
         getClass().getClassLoader(),
-        "org.apache.tools.ant", "org.sonar.ant","org.sonar.batch.bootstrapper"); 
+        "org.apache.tools.ant", "org.sonar.ant","org.sonar.api.batch.bootstrap");
   }
 
   private void checkSonarVersion() {
     String serverVersion = bootstrapper.getServerVersion();
     log("Sonar version: " + serverVersion);
-    if (isVersionPriorTo2Dot8(serverVersion)) {
+    if (isVersionPriorTo3Dot2(serverVersion)) {
       throw new BuildException("Sonar " + serverVersion + " does not support Sonar Ant Task " + getTaskVersion()
-        + ". Please upgrade Sonar to version 2.8 or more.");
+        + ". Please upgrade Sonar to version 3.2 or more.");
     }
   }
 
-  static boolean isVersionPriorTo2Dot8(String version) {
+  static boolean isVersionPriorTo3Dot2(String version) {
     for (String unsupportedVersion : UNSUPPORTED_VERSIONS) {
       if (isVersion(version, unsupportedVersion)) {
         return true;

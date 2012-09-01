@@ -26,7 +26,7 @@ import java.io.FileOutputStream;
 import org.apache.tools.ant.AntTypeDefinition;
 import org.apache.tools.ant.BuildException;
 import org.apache.tools.ant.Project;
-import org.sonar.batch.bootstrapper.ProjectDefinition;
+import org.sonar.api.batch.bootstrap.ProjectDefinition;
 
 import com.thoughtworks.xstream.XStream;
 
